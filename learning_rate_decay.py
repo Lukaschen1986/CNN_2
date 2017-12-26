@@ -1,3 +1,6 @@
+import numpy as np
+import tensorflow as tf
+
 learning_init = 0.1
 decay_rate = 0.1
 global_steps = 300000
@@ -11,8 +14,7 @@ decay_rate = 0.9
 global_step = tf.Variable(0)
 global_steps = 300000
 decay_steps = 70000
-learning_rate = tf.train.exponential_decay(learning_init, global_step, decay_steps, decay_rate, staircase=True)
-staircase=False 每一步都更新；staircase=True 每decay_steps步更新
+learning_rate = tf.train.exponential_decay(learning_init, global_step, decay_steps, decay_rate, staircase=True) # staircase=False 每一步都更新；staircase=True 每decay_steps步更新
 
 lr_res = []
 init = tf.global_variables_initializer()
