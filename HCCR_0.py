@@ -77,3 +77,15 @@ for folder_name in char_df.folder:
         
     X_tmp = X_tmp[1:]
     X = np.concatenate((X, X_tmp), axis=0)
+
+X = X[1:] # 删除第一个0数据
+Y = Y[1:]
+testSet = {"target":X, "label":Y}
+f = open("G:/DataSet/HWDB1/testSet.txt", "wb")
+pickle.dump(testSet, f); f.close()
+
+f = open("G:/DataSet/HWDB1/trainSet_3.txt", "rb")
+trainSet_1 = pickle.load(f)
+trainSet_2 = pickle.load(f)
+trainSet_3 = pickle.load(f)
+f.close()
