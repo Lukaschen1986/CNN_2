@@ -115,57 +115,85 @@ x_train = (x_train/val_max).astype("float32")
 y_train_ot = to_categorical(y_train)
 #y_valid_ot = to_categorical(y_valid)
 
-inpt = Input(shape=(1, 96, 96))
+'''
+c = 96; h = 48; w = 48; n = 128; k = 3
+h*w*n*k*k*c / 1024 / 1024 # 无瓶颈层大小：243
+speed = 1
+d = (c*n*k*w) / (c*w+n*w) / speed
+h*w*d*k*1*c / 1024 / 1024 # 有瓶颈层大小：26
+h*w*n*1*k*d / 1024 / 1024 # 有瓶颈层大小：34
+'''
+
+def d(c, n, k, w, speed):
+    val = (c*n*k*w) / (c*w+n*w) / speed
+    val = int(val)
+    return val
+
+param = {"k":3, "cs":1, "ps":2, "speed":4,
+         "h0":96, "w0":96, "c0":1, 
+         "n1":96, "n2":128, "n3":160,
+         "n4":256, "n5":256, "n6":384,
+         "n7":384, "n8":1024, "n9":140}
+
+inpt = Input(shape=(param["c0"], param["h0"], param["w0"]))
 # 1
-x = Conv2D(filters=96, kernel_size=(3,3), strides=(1,1), padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(inpt)
+x = Conv2D(filters=param["n1"], kernel_size=(param["k"],param["k"]), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(inpt)
 x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
 x = PReLU(alpha_initializer=initializers.zeros())(x)
-x = MaxPooling2D(pool_size=(3,3), strides=2, padding="same")(x) # (96, 48, 48)
+x = MaxPooling2D(pool_size=(param["k"],param["k"]), strides=param["ps"], padding="same")(x) 
+x.shape # (96, 48, 48)
 # 2
-x = Conv2D(filters=128, kernel_size=(3,1), strides=(1,1), padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
-x = Conv2D(filters=128, kernel_size=(1,3), strides=(1,1), padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
+d2 = d(c=param["n1"], n=param["n2"], k=param["k"], w=int(x.shape[2]), speed=param["speed"])
+x = Conv2D(filters=d2, kernel_size=(param["k"],1), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
+x = Conv2D(filters=param["n2"], kernel_size=(1,param["k"]), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
 x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
 x = PReLU(alpha_initializer=initializers.zeros())(x)
-x = MaxPooling2D(pool_size=(3,3), strides=2, padding="same")(x) # (128, 24, 24)
+x = MaxPooling2D(pool_size=(3,3), strides=2, padding="same")(x) 
+x.shape # (128, 24, 24)
 # 3
-x = Conv2D(filters=160, kernel_size=(3,1), strides=(1,1), padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
-x = Conv2D(filters=160, kernel_size=(1,3), strides=(1,1), padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
+d3 = d(c=param["n2"], n=param["n3"], k=param["k"], w=int(x.shape[2]), speed=param["speed"])
+x = Conv2D(filters=d3, kernel_size=(param["k"],1), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
+x = Conv2D(filters=param["n3"], kernel_size=(1,param["k"]), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
 x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
 x = PReLU(alpha_initializer=initializers.zeros())(x)
-x = MaxPooling2D(pool_size=(3,3), strides=2, padding="same")(x) # (160, 12, 12)
+x = MaxPooling2D(pool_size=(param["k"],param["k"]), strides=param["ps"], padding="same")(x) 
+x.shape # (160, 12, 12)
 # 4
-x = Conv2D(filters=256, kernel_size=(3,1), strides=(1,1), padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
-x = Conv2D(filters=256, kernel_size=(1,3), strides=(1,1), padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
+d4 = d(c=param["n3"], n=param["n4"], k=param["k"], w=int(x.shape[2]), speed=param["speed"])
+x = Conv2D(filters=d4, kernel_size=(param["k"],1), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
+x = Conv2D(filters=param["n4"], kernel_size=(1,param["k"]), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
 x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
 x = PReLU(alpha_initializer=initializers.zeros())(x)
 # 5
-x = Conv2D(filters=256, kernel_size=(3,1), strides=(1,1), padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
-x = Conv2D(filters=256, kernel_size=(1,3), strides=(1,1), padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
+d5 = d(c=param["n4"], n=param["n5"], k=param["k"], w=int(x.shape[2]), speed=param["speed"])
+x = Conv2D(filters=d5, kernel_size=(param["k"],1), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
+x = Conv2D(filters=param["n5"], kernel_size=(1,param["k"]), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
 x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
 x = PReLU(alpha_initializer=initializers.zeros())(x)
-x = MaxPooling2D(pool_size=(3,3), strides=2, padding="same")(x) # (256, 6, 6)
+x = MaxPooling2D(pool_size=(param["k"],param["k"]), strides=param["ps"], padding="same")(x) # (256, 6, 6)
 # 6
-x = Conv2D(filters=384, kernel_size=(3,1), strides=(1,1), padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
-x = Conv2D(filters=384, kernel_size=(1,3), strides=(1,1), padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
+d6 = d(c=param["n5"], n=param["n6"], k=param["k"], w=int(x.shape[2]), speed=param["speed"])
+x = Conv2D(filters=d6, kernel_size=(param["k"],1), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
+x = Conv2D(filters=param["n6"], kernel_size=(1,param["k"]), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
 x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
 x = PReLU(alpha_initializer=initializers.zeros())(x)
 # 7
-x = Conv2D(filters=384, kernel_size=(3,1), strides=(1,1), padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
-x = Conv2D(filters=384, kernel_size=(1,3), strides=(1,1), padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
+d7 = d(c=param["n6"], n=param["n7"], k=param["k"], w=int(x.shape[2]), speed=param["speed"])
+x = Conv2D(filters=d7, kernel_size=(param["k"],1), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
+x = Conv2D(filters=param["n7"], kernel_size=(1,param["k"]), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
 x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
 x = PReLU(alpha_initializer=initializers.zeros())(x)
-x = MaxPooling2D(pool_size=(3,3), strides=2, padding="same")(x) # (384, 3, 3)
+x = MaxPooling2D(pool_size=(param["k"],param["k"]), strides=param["ps"], padding="same")(x) # (384, 3, 3)
 # 8
 x = Flatten()(x)
-x = Dense(units=1024, activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
+x = Dense(units=param["n8"], activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
 x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
 x = PReLU(alpha_initializer=initializers.zeros())(x)
 x = Dropout(rate=0.5)(x)
 # 9
-x = Dense(units=140, activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
+x = Dense(units=param["n9"], activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
 x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
 x = Activation("softmax")(x)
-#x.shape
 
 model = Model(inputs=inpt, outputs=x)
 #model.summary()
