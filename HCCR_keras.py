@@ -26,6 +26,7 @@ from keras.utils import plot_model
 from keras.models import load_model, model_from_json, model_from_yaml
 from keras.preprocessing import image
 from keras.utils.np_utils import to_categorical
+from keras.callbacks import EarlyStopping, ReduceLROnPlateau, History
 import gc
 from PIL import Image, ImageEnhance, ImageOps, ImageFile
 import cv2
@@ -129,12 +130,16 @@ def d(c, n, k, w, speed):
     val = int(val)
     return val
 
-param = {"k":3, "cs":1, "ps":2, "speed":4,
+param = {"ck":3, "cs":1, 
+         "mpk":3, "mps":2, 
+         "apk":3, "aps":2, 
+         "speed":4, "reg":0.01,
          "h0":96, "w0":96, "c0":1, 
-         "n1":96, "n2":128, "n3":160,
+         "n1":96, "n2":128, "n3":192,
          "n4":256, "n5":256, "n6":384,
          "n7":384, "n8":1024, "n9":140}
 
+# Model_1
 inpt = Input(shape=(param["c0"], param["h0"], param["w0"]))
 # 1
 x = Conv2D(filters=param["n1"], kernel_size=(param["k"],param["k"]), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(inpt)
@@ -194,16 +199,81 @@ x = Dropout(rate=0.5)(x)
 x = Dense(units=param["n9"], activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
 x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
 x = Activation("softmax")(x)
+#x.shape
+
+# Model_2
+inpt = Input(shape=(param["c0"], param["h0"], param["w0"]))
+# 1
+x = Conv2D(filters=param["n1"], kernel_size=(param["ck"],param["ck"]), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01), kernel_regularizer=l2(param["reg"]))(inpt)
+x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
+x = PReLU(alpha_initializer=initializers.zeros())(x)
+x = MaxPooling2D(pool_size=(param["mpk"],param["mpk"]), strides=param["mps"], padding="same")(x) 
+x.shape # (96, 48, 48)
+# 2
+x = Conv2D(filters=param["n2"], kernel_size=(param["ck"],param["ck"]), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01), kernel_regularizer=l2(param["reg"]))(x)
+x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
+x = PReLU(alpha_initializer=initializers.zeros())(x)
+x = MaxPooling2D(pool_size=(param["mpk"],param["mpk"]), strides=param["mps"], padding="same")(x) 
+x.shape # (128, 24, 24)
+# 3
+x = Conv2D(filters=param["n3"], kernel_size=(param["ck"],param["ck"]), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01), kernel_regularizer=l2(param["reg"]))(x)
+x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
+x = PReLU(alpha_initializer=initializers.zeros())(x)
+x = MaxPooling2D(pool_size=(param["mpk"],param["mpk"]), strides=param["mps"], padding="same")(x) 
+x.shape # (192, 12, 12)
+# 4
+x = Conv2D(filters=param["n4"], kernel_size=(param["ck"],param["ck"]), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01), kernel_regularizer=l2(param["reg"]))(x)
+x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
+x = PReLU(alpha_initializer=initializers.zeros())(x)
+x.shape # (256, 12, 12)
+# 5
+x = Conv2D(filters=param["n5"], kernel_size=(param["ck"],param["ck"]), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01), kernel_regularizer=l2(param["reg"]))(x)
+x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
+x = PReLU(alpha_initializer=initializers.zeros())(x)
+x = AveragePooling2D(pool_size=(param["apk"],param["apk"]), strides=param["aps"], padding="same")(x) # (256, 6, 6)
+x.shape # (256, 6, 6)
+# 6
+x = Conv2D(filters=param["n6"], kernel_size=(param["ck"],param["ck"]), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01), kernel_regularizer=l2(param["reg"]))(x)
+x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
+x = PReLU(alpha_initializer=initializers.zeros())(x)
+# 7
+x = Conv2D(filters=param["n7"], kernel_size=(param["ck"],param["ck"]), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01), kernel_regularizer=l2(param["reg"]))(x)
+x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
+x = PReLU(alpha_initializer=initializers.zeros())(x)
+x = AveragePooling2D(pool_size=(param["apk"],param["apk"]), strides=param["aps"], padding="same")(x) 
+x.shape # (384, 3, 3)
+# 8
+x = Flatten()(x)
+x = Dense(units=param["n8"], activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
+x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
+x = PReLU(alpha_initializer=initializers.zeros())(x)
+x = Dropout(rate=0.5)(x)
+# 9
+x = Dense(units=param["n9"], activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
+x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
+x = Activation("softmax")(x)
+x.shape
 
 model = Model(inputs=inpt, outputs=x)
 #model.summary()
 #plot_model(model, to_file="model.png", show_shapes=True, show_layer_names=True)
 
-model.compile(loss="categorical_crossentropy", optimizer=SGD(lr=0.1, momentum=0.9, decay=0.1), metrics=["accuracy"])
-#model.compile(loss="categorical_crossentropy", optimizer=Adam(lr=0.1, beta_1=0.9, beta_2=0.999, epsilon=10**-8, decay=0.0), metrics=["accuracy"])
-bs = 256
-model.fit(x_train, y_train_ot, batch_size=bs, epochs=5, verbose=1) 
+#model.compile(loss="categorical_crossentropy", optimizer=SGD(lr=0.1, momentum=0.9, decay=0.1), metrics=["accuracy"])
+bs = 128; epc = 60; dcy = 0.04
+0.1*(1-dcy)**np.arange(epc)
+model.compile(loss="categorical_crossentropy", optimizer=Adam(lr=0.1, beta_1=0.9, beta_2=0.999, epsilon=10**-8, decay=dcy), metrics=["accuracy"]) # decay=dcy
+early_stopping = EarlyStopping(monitor="loss", patience=2, mode='auto', verbose=1) # 在min模式下，如果检测值停止下降则中止训练。在max模式下，当检测值不再上升则停止训练
+#reduce = ReduceLROnPlateau(monitor="loss", factor=0.1, patience=2, mode='auto', epsilon=0.0001, cooldown=0, min_lr=0.0001, verbose=1)
+t0 = pd.Timestamp.now()
+model_fit = model.fit(x_train, y_train_ot, batch_size=bs, epochs=epc, verbose=1, callbacks=[early_stopping])
 # validation_data=(x_valid, y_valid_ot); validation_split=0.2
+t1 = pd.Timestamp.now()
+print("time total spend: " + str(t1-t0))
+print(model_fit.history)
+print(model_fit.history.keys())
+print(model_fit.history['loss'])
+plt.plot(model_fit.history['loss'])
+plt.plot(model_fit.history['acc'])
 
 ## pred
 f = open("G:/DataSet/detail/testSet_140.txt", "rb")
@@ -217,17 +287,19 @@ val_max = 255
 x_test = (x_test/val_max).astype("float32")
 y_test_ot = to_categorical(y_test)
 
-loss_train, accu_train = model.evaluate(x_train, y_train_ot, verbose=1)
-loss_valid, accu_valid = model.evaluate(x_test, y_test_ot, verbose=1)
+loss_train, acc_train = model.evaluate(x_train, y_train_ot, batch_size=bs, verbose=1)
+print(loss_train, acc_train)
+loss_test, acc_test = model.evaluate(x_test, y_test_ot, verbose=1)
+print(loss_test, acc_test)
 
 output = model.predict(x_test, batch_size=bs, verbose=1)
 y_pred = np.argmax(output, axis=1)
-sum(y_pred == y_test) / len(y_test) # 0.9249
+sum(y_pred == y_test) / len(y_test) # 0.937
 pd.crosstab(y_test, y_pred, margins=True)
 
 # 模型和权重
-model.save('my_model.h5')
-model = load_model('my_model.h5')
+model.save("trainSet_140_9.h5", overwrite=True, include_optimizer=True)
+model = load_model('trainSet_140.h5', compile=True)
 # 模型
 json_string = model.to_json()
 model = model_from_json(json_string)
