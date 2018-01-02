@@ -70,15 +70,14 @@ for char in char_set:
         os.chdir("G:/DataSet/detail/" + dim + folder_name)
         flag += 1
         images_list = os.listdir()
-        
+        # save Y
         Y_tmp = np.tile(flag, len(images_list))
         Y = np.concatenate((Y, Y_tmp))
-        
+        # save Z
         Z.append(char)
-        
+        # save X
         X_tmp = np.zeros((img_size, img_size), dtype="uint8")
         X_tmp = np.expand_dims(X_tmp, axis=0)
-            
         for file_name in images_list:
             pic = Image.open(file_name, mode="r")
             pic_resize = pic.resize((img_size, img_size), Image.BICUBIC)
@@ -92,6 +91,9 @@ for char in char_set:
             
         X_tmp = X_tmp[1:]
         X = np.concatenate((X, X_tmp), axis=0)
+    else:
+        print("the char isn't in folder")
+        continue
 
 #for folder_name in char_df.folder:
 #    if char_df[char_df.folder == folder_name].word.values[0] in char_set:
