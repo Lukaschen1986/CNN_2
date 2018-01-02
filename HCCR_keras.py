@@ -53,24 +53,28 @@ len(folders_res)
 char_df = pd.DataFrame({"word":words, "folder":folders_res}, columns=["word","folder"])
 char_df = char_df.sort_values(by="folder", ascending=True)
 
-char_set = "的一是了我不人在他有这个上们来到时大地为子中你说生国年着就那和要她出也得里后自以会家可下而过天去能对小多然于心学么之都好看起发当没成只如事把还用第样道想作种开美总从无情己面最女但现前些所同日手又行意动方期它头经长儿回位分爱老因很给名法间斯知世什两次使身者被高已亲其进此话常与活正感"
+char_set = "的一是了我不人在他有这个上们来到时大地为子中你说生国年着就那和要她出也得里后自以会家可下而过天去能对小多然于心学么之都好看起发当没成只如事把还用第样道想作种开美总从无情面最女但现前些所同日手又行意动方期它头经长儿回位分爱老因很给名法间斯知世什两次使身者被高已亲其进此话常与活正感订单己确认取消"
 
 img_size = 96
 X = np.zeros((img_size, img_size), dtype="uint8")
 X = np.expand_dims(X, axis=0)
 Y = np.zeros(1, dtype="uint8")
+Z = []
 
 dim = "test/" # train/
 flag = -1
-for folder_name in char_df.folder:
-    if char_df[char_df.folder == folder_name].word.values[0] in char_set:
+for char in char_set:
+    # char = "的"
+    if char in char_df.word.values:
+        folder_name = char_df[char_df.word.values == char].folder.values[0]
         os.chdir("G:/DataSet/detail/" + dim + folder_name)
-        print("into folder: " + folder_name + "; time: " + str(pd.Timestamp.now())[0:19])
         flag += 1
         images_list = os.listdir()
         
         Y_tmp = np.tile(flag, len(images_list))
         Y = np.concatenate((Y, Y_tmp))
+        
+        Z.append(char)
         
         X_tmp = np.zeros((img_size, img_size), dtype="uint8")
         X_tmp = np.expand_dims(X_tmp, axis=0)
@@ -88,6 +92,33 @@ for folder_name in char_df.folder:
             
         X_tmp = X_tmp[1:]
         X = np.concatenate((X, X_tmp), axis=0)
+
+#for folder_name in char_df.folder:
+#    if char_df[char_df.folder == folder_name].word.values[0] in char_set:
+#        os.chdir("G:/DataSet/detail/" + dim + folder_name)
+#        print("into folder: " + folder_name + "; time: " + str(pd.Timestamp.now())[0:19])
+#        flag += 1
+#        images_list = os.listdir()
+#        
+#        Y_tmp = np.tile(flag, len(images_list))
+#        Y = np.concatenate((Y, Y_tmp))
+#        
+#        X_tmp = np.zeros((img_size, img_size), dtype="uint8")
+#        X_tmp = np.expand_dims(X_tmp, axis=0)
+#            
+#        for file_name in images_list:
+#            pic = Image.open(file_name, mode="r")
+#            pic_resize = pic.resize((img_size, img_size), Image.BICUBIC)
+#                
+#            pic_array = image.img_to_array(pic_resize, "channels_last").astype("uint8") # img_to_array
+#            pic_grey = cv2.cvtColor(pic_array, code=cv2.COLOR_BGR2GRAY) # 灰度化
+#            pic_threshold = cv2.threshold(pic_grey, 0, 255, cv2.THRESH_OTSU | cv2.THRESH_BINARY_INV)[1] # 二值化 与 黑白翻转
+#    #        Image.fromarray(pic_threshold)
+#            pic_new = np.expand_dims(pic_threshold, axis=0) # 变为一通道
+#            X_tmp = np.concatenate((X_tmp, pic_new), axis=0)
+#            
+#        X_tmp = X_tmp[1:]
+#        X = np.concatenate((X, X_tmp), axis=0)
 
 X = X[1:] # 删除第一个0数据
 Y = Y[1:]
