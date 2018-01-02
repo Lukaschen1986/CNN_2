@@ -53,7 +53,8 @@ len(folders_res)
 char_df = pd.DataFrame({"word":words, "folder":folders_res}, columns=["word","folder"])
 char_df = char_df.sort_values(by="folder", ascending=True)
 
-char_set = "的一是了我不人在他有这个上们来到时大地为子中你说生国年着就那和要她出也得里后自以会家可下而过天去能对小多然于心学么之都好看起发当没成只如事把还用第样道想作种开美总从无情面最女但现前些所同日手又行意动方期它头经长儿回位分爱老因很给名法间斯知世什两次使身者被高已亲其进此话常与活正感订单己确认取消"
+char_set = "的一是了我不人在他有这个上们来到时大地为子中你说生国年着就那和要她出也得里后自以会家可下而过天去能对小多然于心学么之都好看起发当没成只如事把还用第样道想作种开美总从无情面最女但现前些所同日手又行意动方期它头经长儿回位分爱老因很给名法间斯知世什两次使身者被高已亲其进此话常与活正感订单己确认取消慧通商旅华"
+len(char_set)
 
 img_size = 96
 X = np.zeros((img_size, img_size), dtype="uint8")
