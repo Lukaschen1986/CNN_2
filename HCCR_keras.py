@@ -48,7 +48,6 @@ for folder in folders:
     else:
         folder_new = "0" + str(folder)
     folders_res.append(folder_new)
-len(folders_res)
 
 char_df = pd.DataFrame({"word":words, "folder":folders_res}, columns=["word","folder"])
 char_df = char_df.sort_values(by="folder", ascending=True)
@@ -62,13 +61,14 @@ X = np.expand_dims(X, axis=0)
 Y = np.zeros(1, dtype="uint8")
 Z = []
 
-dim = "test/" # train/
+dim = "train/" # train/  test/
 flag = -1
 for char in char_set:
     # char = "的"
     if char in char_df.word.values:
         folder_name = char_df[char_df.word.values == char].folder.values[0]
         os.chdir("G:/DataSet/detail/" + dim + folder_name)
+        print("into folder: " + folder_name + "; time: " + str(pd.Timestamp.now())[0:19])
         flag += 1
         images_list = os.listdir()
         # save Y
@@ -126,18 +126,19 @@ for char in char_set:
 X = X[1:] # 删除第一个0数据
 Y = Y[1:]
 
-trainSet_140 = {"target":X, "label":Y}
-f = open("G:/DataSet/detail/trainSet_140.txt", "wb")
-pickle.dump(trainSet_140, f); f.close()
+trainSet_151 = {"target":X, "label":Y, "describe":Z}
+f = open("G:/DataSet/detail/trainSet_151.txt", "wb")
+pickle.dump(trainSet_151, f); f.close()
 
-testSet_140 = {"target":X, "label":Y}
-f = open("G:/DataSet/detail/testSet_140.txt", "wb")
-pickle.dump(testSet_140, f); f.close()
+testSet_151 = {"target":X, "label":Y, "describe":Z}
+f = open("G:/DataSet/detail/testSet_151.txt", "wb")
+pickle.dump(testSet_151, f); f.close()
 
 # model
-f = open("G:/DataSet/detail/trainSet_140.txt", "rb")
-trainSet_140 = pickle.load(f); f.close()
-x_train = trainSet_140["target"]; y_train = trainSet_140["label"]
+f = open("G:/DataSet/detail/trainSet_151.txt", "rb")
+trainSet_151 = pickle.load(f); f.close()
+x_train = trainSet_151["target"]; y_train = trainSet_151["label"]; z_train = trainSet_151["describe"]
+dicts = pd.DataFrame({"label":list(set(y_train)), "describe":z_train})
 x_train, y_train = shuffle(x_train, y_train, random_state=0)
 
 N, H, W = x_train.shape
@@ -171,7 +172,8 @@ param = {"ck":3, "cs":1,
          "h0":96, "w0":96, "c0":1, 
          "n1":96, "n2":128, "n3":192,
          "n4":256, "n5":256, "n6":384,
-         "n7":384, "n8":1024, "n9":140}
+         "n7":384, "n8":1024, "n9":512,
+         "n10":151}
 
 # Model_1
 inpt = Input(shape=(param["c0"], param["h0"], param["w0"]))
@@ -264,7 +266,7 @@ x.shape # (256, 12, 12)
 x = Conv2D(filters=param["n5"], kernel_size=(param["ck"],param["ck"]), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01), kernel_regularizer=l2(param["reg"]))(x)
 x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
 x = PReLU(alpha_initializer=initializers.zeros())(x)
-x = AveragePooling2D(pool_size=(param["apk"],param["apk"]), strides=param["aps"], padding="same")(x) # (256, 6, 6)
+x = MaxPooling2D(pool_size=(param["mpk"],param["mpk"]), strides=param["mps"], padding="same")(x) # (256, 6, 6)
 x.shape # (256, 6, 6)
 # 6
 x = Conv2D(filters=param["n6"], kernel_size=(param["ck"],param["ck"]), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01), kernel_regularizer=l2(param["reg"]))(x)
@@ -274,7 +276,7 @@ x = PReLU(alpha_initializer=initializers.zeros())(x)
 x = Conv2D(filters=param["n7"], kernel_size=(param["ck"],param["ck"]), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01), kernel_regularizer=l2(param["reg"]))(x)
 x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
 x = PReLU(alpha_initializer=initializers.zeros())(x)
-x = AveragePooling2D(pool_size=(param["apk"],param["apk"]), strides=param["aps"], padding="same")(x) 
+x = MaxPooling2D(pool_size=(param["mpk"],param["mpk"]), strides=param["mps"], padding="same")(x) 
 x.shape # (384, 3, 3)
 # 8
 x = Flatten()(x)
@@ -284,6 +286,11 @@ x = PReLU(alpha_initializer=initializers.zeros())(x)
 x = Dropout(rate=0.5)(x)
 # 9
 x = Dense(units=param["n9"], activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
+x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
+x = PReLU(alpha_initializer=initializers.zeros())(x)
+x = Dropout(rate=0.5)(x)
+# 10
+x = Dense(units=param["n10"], activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
 x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
 x = Activation("softmax")(x)
 x.shape
@@ -310,9 +317,9 @@ plt.plot(model_fit.history['loss'])
 plt.plot(model_fit.history['acc'])
 
 ## pred
-f = open("G:/DataSet/detail/testSet_140.txt", "rb")
-testSet_140 = pickle.load(f); f.close()
-x_test = testSet_140["target"]; y_test = testSet_140["label"]
+f = open("G:/DataSet/detail/testSet_151.txt", "rb")
+testSet_151 = pickle.load(f); f.close()
+x_test = testSet_151["target"]; y_test = testSet_151["label"]; z_test = testSet_151["describe"]
 x_test, y_test = shuffle(x_test, y_test, random_state=0)
 
 N, H, W = x_test.shape
