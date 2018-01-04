@@ -52,7 +52,7 @@ for folder in folders:
 char_df = pd.DataFrame({"word":words, "folder":folders_res}, columns=["word","folder"])
 char_df = char_df.sort_values(by="folder", ascending=True)
 
-char_set = "的一是了我不人在他有这个上们来到时大地为子中你说生国年着就那和要她出也得里后自以会家可下而过天去能对小多然于心学么之都好看起发当没成只如事把还用第样道想作种开美总从无情面最女但现前些所同日手又行意动方期它头经长儿回位分爱老因很给名法间斯知世什两次使身者被高已亲其进此话常与活正感订单己确认取消慧通商旅华"
+char_set = "的一是了我不人在他有这个上们来到时大地为子中你说生国年着就那和要她出也得里后自以会家可下而过天去能对小多然于心学么之都好看起发当没成只如事把还用第样道想作种开美总从无情面最女但现前些所同日手又行意动方期它头经长儿回位分爱老因很给名法间斯知世什两次使身者被高已亲其进此话常与活正感订单己确认取消慧通商旅华已角肖逼力惠"
 len(char_set)
 
 img_size = 96
@@ -126,18 +126,18 @@ for char in char_set:
 X = X[1:] # 删除第一个0数据
 Y = Y[1:]
 
-trainSet_151 = {"target":X, "label":Y, "describe":Z}
-f = open("G:/DataSet/detail/trainSet_151.txt", "wb")
-pickle.dump(trainSet_151, f); f.close()
+trainSet_157 = {"target":X, "label":Y, "describe":Z}
+f = open("G:/DataSet/detail/trainSet_157.txt", "wb")
+pickle.dump(trainSet_157, f); f.close()
 
-testSet_151 = {"target":X, "label":Y, "describe":Z}
-f = open("G:/DataSet/detail/testSet_151.txt", "wb")
-pickle.dump(testSet_151, f); f.close()
+testSet_157 = {"target":X, "label":Y, "describe":Z}
+f = open("G:/DataSet/detail/testSet_157.txt", "wb")
+pickle.dump(testSet_157, f); f.close()
 
 # model
-f = open("G:/DataSet/detail/trainSet_151.txt", "rb")
-trainSet_151 = pickle.load(f); f.close()
-x_train = trainSet_151["target"]; y_train = trainSet_151["label"]; z_train = trainSet_151["describe"]
+f = open("G:/DataSet/detail/trainSet_157.txt", "rb")
+trainSet_157 = pickle.load(f); f.close()
+x_train = trainSet_157["target"]; y_train = trainSet_157["label"]; z_train = trainSet_157["describe"]
 dicts = pd.DataFrame({"label":list(set(y_train)), "describe":z_train})
 x_train, y_train = shuffle(x_train, y_train, random_state=0)
 
@@ -166,14 +166,14 @@ def d(c, n, k, w, speed):
     return val
 
 param = {"ck":3, "cs":1, 
-         "mpk":3, "mps":2, 
-         "apk":3, "aps":2, 
+         "mpk":2, "mps":2, 
+         "apk":2, "aps":2, 
          "speed":4, "reg":0.01,
          "h0":96, "w0":96, "c0":1, 
          "n1":96, "n2":128, "n3":192,
          "n4":256, "n5":256, "n6":384,
          "n7":384, "n8":1024, "n9":512,
-         "n10":151}
+         "n10":157}
 
 # Model_1
 inpt = Input(shape=(param["c0"], param["h0"], param["w0"]))
@@ -284,11 +284,13 @@ x = Dense(units=param["n8"], activation=None, use_bias=False, kernel_initializer
 x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
 x = PReLU(alpha_initializer=initializers.zeros())(x)
 x = Dropout(rate=0.5)(x)
+x.shape
 # 9
 x = Dense(units=param["n9"], activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
 x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
 x = PReLU(alpha_initializer=initializers.zeros())(x)
 x = Dropout(rate=0.5)(x)
+x.shape
 # 10
 x = Dense(units=param["n10"], activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01))(x)
 x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
@@ -300,13 +302,13 @@ model = Model(inputs=inpt, outputs=x)
 #plot_model(model, to_file="model.png", show_shapes=True, show_layer_names=True)
 
 #model.compile(loss="categorical_crossentropy", optimizer=SGD(lr=0.1, momentum=0.9, decay=0.1), metrics=["accuracy"])
-bs = 128; epc = 60; dcy = 0.04
-0.1*(1-dcy)**np.arange(epc)
+bs = 128; epc = 100; lr = 0.1; dcy = 0.04
+lr*(1-dcy)**np.arange(epc)
 model.compile(loss="categorical_crossentropy", optimizer=Adam(lr=0.1, beta_1=0.9, beta_2=0.999, epsilon=10**-8, decay=dcy), metrics=["accuracy"]) # decay=dcy
 early_stopping = EarlyStopping(monitor="loss", patience=2, mode='auto', verbose=1) # 在min模式下，如果检测值停止下降则中止训练。在max模式下，当检测值不再上升则停止训练
 #reduce = ReduceLROnPlateau(monitor="loss", factor=0.1, patience=2, mode='auto', epsilon=0.0001, cooldown=0, min_lr=0.0001, verbose=1)
 t0 = pd.Timestamp.now()
-model_fit = model.fit(x_train, y_train_ot, batch_size=bs, epochs=epc, verbose=1, callbacks=[early_stopping])
+model_fit = model.fit(x_train, y_train_ot, batch_size=bs, epochs=epc, verbose=1, shuffle=True, callbacks=[early_stopping])
 # validation_data=(x_valid, y_valid_ot); validation_split=0.2
 t1 = pd.Timestamp.now()
 print("time total spend: " + str(t1-t0))
@@ -317,9 +319,9 @@ plt.plot(model_fit.history['loss'])
 plt.plot(model_fit.history['acc'])
 
 ## pred
-f = open("G:/DataSet/detail/testSet_151.txt", "rb")
-testSet_151 = pickle.load(f); f.close()
-x_test = testSet_151["target"]; y_test = testSet_151["label"]; z_test = testSet_151["describe"]
+f = open("G:/DataSet/detail/testSet_157.txt", "rb")
+testSet_157 = pickle.load(f); f.close()
+x_test = testSet_157["target"]; y_test = testSet_157["label"]; z_test = testSet_157["describe"]
 x_test, y_test = shuffle(x_test, y_test, random_state=0)
 
 N, H, W = x_test.shape
@@ -339,8 +341,8 @@ sum(y_pred == y_test) / len(y_test) # 0.937
 pd.crosstab(y_test, y_pred, margins=True)
 
 # 模型和权重
-model.save("trainSet_140_9.h5", overwrite=True, include_optimizer=True)
-model = load_model('trainSet_140.h5', compile=True)
+model.save("trainSet_157_12.h5", overwrite=True, include_optimizer=True)
+model = load_model('trainSet_157_12.h5', compile=True)
 # 模型
 json_string = model.to_json()
 model = model_from_json(json_string)
