@@ -241,6 +241,7 @@ x = Activation("softmax")(x)
 inpt = Input(shape=(param["c0"], param["h0"], param["w0"]))
 # 1
 x = Conv2D(filters=param["n1"], kernel_size=(param["ck"],param["ck"]), strides=param["cs"], padding="same", activation=None, use_bias=False, kernel_initializer=initializers.random_normal(0.0, 0.01), kernel_regularizer=l2(param["reg"]))(inpt)
+# initializers.random_normal(0.0, 0.01); initializers.TruncatedNormal(0.0, 0.01); initializers.Orthogonal(gain=1.0)
 x = BatchNormalization(axis=1, center=True, beta_initializer=initializers.zeros(), scale=True, gamma_initializer=initializers.ones(), epsilon=10**-8, momentum=0.9)(x)
 x = PReLU(alpha_initializer=initializers.zeros())(x)
 x = MaxPooling2D(pool_size=(param["mpk"],param["mpk"]), strides=param["mps"], padding="same")(x) 
