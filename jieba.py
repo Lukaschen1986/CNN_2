@@ -42,3 +42,14 @@ for word, flag in words:
     
 # 中文分词工具jieba中的词性类型
 # https://www.cnblogs.com/adienhsuan/p/5674033.html
+
+# 词向量
+from gensim.models.word2vec import Word2Vec
+from gensim.models.word2vec import LineSentence
+
+sentences = LineSentence("F:/百度云同步盘/我的学习/6 数据科学/ML/七月/NLP/第7课/wiki.zh.word.text")
+model = Word2Vec(sentences, size=128, window=5, min_count=5, workers=4)
+model.save("word_embedding_128")
+model = Word2Vec.load("word_embedding_128")
+items = model.most_similiar("中国")
+model.similarity("男人", "女人")
