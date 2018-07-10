@@ -53,4 +53,21 @@ for epoch in range(10):
 sess.close()
     
 #######################################################################################################
+def add_layer(inputs, in_size, out_size, active_func=None):
+    # params
+    w = tf.Variable(initial_value=tf.random_normal(shape=[in_size, out_size], mean=0.0, stddev=1.0)*0.01, name="w", dtype=tf.float32)
+    b = tf.Variable(initial_value=tf.zeros(shape=[1, out_size])+10**-8, name="b", dtype=tf.float32)
+    wx_plus_b = tf.add(tf.matmul(inputs, w), b)
+    # active_func
+    if active_func is None:
+        outputs = wx_plus_b
+    else:
+        outputs = active_func(wx_plus_b)
+    return outputs
+    
+x = np.linspace(-1, 1, 300)[:, np.newaxis].astype(np.float32)
+e = np.random.normal(0, 0.05, size=x.shape).astype(np.float32)
+y = x**2 - 0.5 + e
 
+layer_1 = add_layer(inputs=x, in_size=x.shape[1], out_size=10, active_func=tf.nn.relu)
+prediction = add_layer(inputs=layer_1, in_size=int(layer_1.shape[1]), out_size=1, active_func=None)
