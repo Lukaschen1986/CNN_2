@@ -1,5 +1,6 @@
 # CNN_2
 #### 训练神经网络时如何确定batch的大小？  https://mp.weixin.qq.com/s?__biz=MzIwNzc2NTk0NQ==&mid=2247484570&idx=1&sn=4c0b6b76a7f2518d77818535b677e087&chksm=970c2c4ca07ba55ad5cfe6b46f72dbef85a159574fb60b9932404e45747c95eed8c6c0f66d62#rd  
+#### 算法优化之道：避开鞍点  https://www.csdn.net/article/2016-04-07/2826616  
 #### 哈？你还认为似然函数跟交叉熵是一个意思呀？  https://mp.weixin.qq.com/s?__biz=MzIwNzc2NTk0NQ==&mid=2247484563&idx=1&sn=30a82e9b0760c9957f50ae5e969c10ee&chksm=970c2c45a07ba553f31e88ee29c6bfc926d03da0f3bb793a75507226f3dc6cf665b51c7071cb#rd  
 #### 深度前馈网络与Xavier初始化原理  https://mp.weixin.qq.com/s?__biz=MzIwNzc2NTk0NQ==&mid=2247484619&idx=1&sn=1c48f2b743e7ef548287a6626f9bca37&chksm=970c2c1da07ba50b743fa66034dfba38217c04e0dbf58c84885bf3439313cff372197f7d68d9#rd  
 #### Step-by-step to LSTM: 解析LSTM神经网络设计原理  https://www.jiqizhixin.com/articles/2018-07-06-7  
