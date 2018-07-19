@@ -8,3 +8,4 @@
 #### 解开玻尔兹曼机的封印会发生什么？  https://mp.weixin.qq.com/s?__biz=MzIwNzc2NTk0NQ==&mid=2247484521&idx=1&sn=5c62c691c7954c263eef6850a6892b2c&chksm=970c2cbfa07ba5a9e50f85773c6f990cc926bac86da855d5ff802b65efa2aebc32a85a1f20d6#rd
 
 #### 卷积神经网络「失陷」，CoordConv来填坑  https://www.jiqizhixin.com/articles/uber-CoordConv  
+#### 从FM推演各深度CTR预估模型(附代码)  https://www.jiqizhixin.com/articles/2018-07-16-17  
