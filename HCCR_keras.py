@@ -319,6 +319,18 @@ print(model_fit.history['loss'])
 plt.plot(model_fit.history['loss'])
 plt.plot(model_fit.history['acc'])
 
+'''
+from keras.callbacks import ModelCheckpoint
+checkpointer = ModelCheckpoint(filepath='saved_models/weights.best.Resnet50.hdf5', 
+                               verbose=1, save_best_only=True)
+
+ResNet50_model.fit(train_Resnet50, train_targets, 
+                   validation_data=(valid_Resnet50, valid_targets),
+                   epochs=20, batch_size=128, callbacks=[checkpointer], verbose=1)
+
+ResNet50_model.load_weights('saved_models/weights.best.Resnet50.hdf5')
+'''
+
 ## pred
 f = open("G:/DataSet/detail/testSet_157.txt", "rb")
 testSet_157 = pickle.load(f); f.close()
