@@ -11,6 +11,13 @@
 #### ImageNet  https://www.pyimagesearch.com/2017/03/20/imagenet-vggnet-resnet-inception-xception-keras/  
 #### http://cv-tricks.com/cnn/understand-resnet-alexnet-vgg-inception/  
 #### Display Deep Learning Model Training History in Keras  https://machinelearningmastery.com/display-deep-learning-model-training-history-in-keras/  
+#### 推出一个半月，斯坦福SQuAD问答榜单前六名都在使用BERT https://www.jiqizhixin.com/articles/2018-11-26-4  
+#### 微软亚洲研究院：NLP将迎来黄金十年 https://www.jiqizhixin.com/articles/2018-11-25  
+#### 自然语言处理中的语言模型预训练方法 https://www.jiqizhixin.com/articles/2018-10-22-3?from=synced&keyword=NLP  
+#### Dropout 可能要换了 https://www.jiqizhixin.com/articles/112501  
+#### DeepMind推出深度学习与强化学习进阶课程 https://www.jiqizhixin.com/articles/2018-11-24-3  
+#### 中文项目：快速识别验证码 https://www.jiqizhixin.com/articles/2018-11-24  
+#### 读懂智能对话系统（1）任务导向型对话系统 https://www.jiqizhixin.com/articles/2018-11-23-17  
 
 #### 以下是我对改进模型提出的建议，希望对你有帮助：  
 ###### 1、模型融合（Model Ensembling）
